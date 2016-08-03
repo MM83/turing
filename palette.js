@@ -39,6 +39,13 @@ $(function(){
             scrollTop : "0px"
         }, ANIM_TIME);
         $routineScroll.animate({ scrollTop : 0 }, "easeInOutCirc");
+        $routineScroll.each(function(){
+            console.log("stepping");
+            var $elem = $(this);
+            $elem.animate({
+                opacity : 0.25
+            });
+        });
     };
     
     function animateInUI(){
@@ -61,9 +68,17 @@ $(function(){
         $stepButton.animate({
             right : "-50vw"
         });
+        $routineScroll.each(function(){
+            console.log("stepping");
+            var $elem = $(this);
+            $elem.animate({
+                opacity : 1
+            });
+        });
     };
     
     function toggleExecute(){
+        buildTree();
         if(!running){
             //TODO - Init running
             animateOutUI();
@@ -80,7 +95,7 @@ $(function(){
         $panels.animate({
             opacity : +(!viewLevel)
         }, 300);
-        $viewButton.html(viewLevel ? "VIEW ROUTINE" : "VIEW LEVEL");
+        $viewButton.html(viewLevel ? "VIEW CODE" : "VIEW LEVEL");
     };
     
     var Action = {
@@ -96,9 +111,8 @@ $(function(){
     
     function addActionToRoutine(action, elemToAppendTo){
         
+        var indent = !elemToAppendTo;
         elemToAppendTo = elemToAppendTo || $routineList;
-        
-        
         
         var $action, $close = $('<div class="x-box">X</div>');
         
@@ -111,25 +125,41 @@ $(function(){
                 var $dropArea = $('<div class="list-drop-area"></div>');
                 var $innerList = $('<ul class="inner-list"/>');
                 
+                $condTop.css({
+                    color : "#ebca3e"
+                });
+                
+                $action.append($dropArea);
                 $action.append($condTop);
                 $condTop.append($close);
                 $action.append($innerList);
                 $action.append($condBottom);
-                $action.append($dropArea);
                 
                 $innerList.sortable();
                 
+                $action[0].__list = $innerList[0];
                 $dropArea[0].__$list = $innerList;//Hacky but it's JS eh?
+                $innerList[0].__$list = $innerList;
+                
                 
                 break;
             default:
                 $action = $('<li class="routine-item"></li>').html(action);
                 $action.append($close);
+                
                 break;
         }
+        
+        if(action == "Restart")
+            $action.css({
+                color : "#eb3e3e"
+            });
+        
         $close.on("touchstart", function(){
                     $action.remove();
                 });
+        
+        $action[0].__action = action;
         elemToAppendTo.append($action);
     };
     
@@ -138,10 +168,8 @@ $(function(){
     var lastTouch;
     
     function touchStartAction(e){
-        if(draggingAction)
-            return;
         
-        $(".list-drop-area").css({
+        $dragBar.css({
             visibility : "visible"
         });
         
@@ -159,34 +187,29 @@ $(function(){
         lastTouch = e.touches[0];
     };    
     function touchEndBody(e){
+        
+        $dragBar.css({
+            visibility : "hidden"
+        });
        
         if(!lastTouch)
             return;
         if(draggingAction){
             var dropElement = document.elementFromPoint(lastTouch.pageX, lastTouch.pageY);
-            
+            var $drop = $(dropElement);
             if(dropElement.id == "routine-drop-area"){
                 addActionToRoutine(actionToMake);
-            } else if(dropElement.className == "list-drop-area"){
+                    //
+            } else if($drop.hasClass("list-drop-area") || $drop.hasClass("inner-list")){
                 addActionToRoutine(actionToMake, dropElement.__$list);
             }
             
         }
         showAllActions();
         draggingAction = false;
-         
-        $(".list-drop-area").css({
-            visibility : "hidden"
-        });
         
     }
-    function touchEndInnerList(){
-        console.log("fuck");
-        if(draggingAction)
-            addActionToRoutine($(this));
-        draggingAction = false;
-        console.log("Bobby 3D");
-    };   
+      
     function showAllActions(){
         $actionItems.animate({
             opacity : 1
@@ -201,6 +224,38 @@ $(function(){
             opacity : 1
         });
     };
+    
+    
+    function buildTree(){
+    
+        var tree = [];
+        var elem = $routineList[0];
+        
+        var depth = 0;
+        function parse(elem){
+            ++depth;
+            //elem is assumed to have a list of child li nodes
+            $(elem).children("li").each(function(){
+                console.log("li", depth, this.__action);
+                switch(this.__action){
+                case "Loop":
+                case "If":
+                    parse(this.__list);
+                    break;
+                default:
+                    
+                    break;
+            }
+            });
+            --depth;
+        };
+        
+        parse($routineList[0]);
+        
+    
+    };
+    
+    
     
     //======================================== BIND TOUCH EVENTS
     

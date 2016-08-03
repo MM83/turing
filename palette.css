@@ -1,6 +1,7 @@
 body {
     margin: 0px;
-    overflow: hidden;
+    max-width: 100%;
+    overflow:hidden;
     color: #62af91;
     font-family: Helvetica, Arial, sans-serif;
 }
@@ -13,18 +14,19 @@ body {
     background: black;
     border: 4px solid #62af91;
     border-radius: 2vw;
-    width: 48vw;
 }
 
 #action-panel {
     left: 1vw;
     top: 1vw;
     bottom: 25vw;
+    width: 28vw;
 }
 #routine-panel {
     right: 1vw;
     top: 1vw;
     bottom: 1vw;
+    width: 68vw;
 }
 
 .bottom-button {
@@ -32,10 +34,10 @@ body {
     background: black;
     border: 4px solid #62af91;
     border-radius: 2vw;
-    width: 49vw;
+    width: 29vw;
     height: 12vw;
-    font-size: 4vw;
-    padding: 3vw;
+    font-size: 3vw;
+    padding: 4vw;
     text-align: center;
     box-sizing: border-box;
 }
@@ -77,11 +79,19 @@ h2 {
     background: #4c4cd0;
     margin: 2vw;
     padding: 2vw;
-    width: 36vw;
+    width: 19vw;
     border-radius: 1vw;
     box-sizing: border-box;
     text-align: center;
     color: black;
+}
+
+.action-nest {
+    background: #ebca3e;
+}
+
+.action-return {
+    background: #eb3e3e;
 }
 
 ::-webkit-scrollbar { 
@@ -91,21 +101,21 @@ h2 {
 .routine-item {
     position: relative;
     font-size: 3vw;
+    color : #4c4cd0;
     margin: 2vw;
     padding: 2vw;
-    width: 36vw;
     border: 4px solid #62af91;
     border-radius: 1vw;
     box-sizing: border-box;
     text-align: left;
     background: black;
+    width: 40vw;
 }
 
 .routine-condition {
-    background: #333;
     border-radius: 4vw;
-    width: 36vw;
     position: relative;
+    width: 40vw;
 }
 
 .x-box {
@@ -130,9 +140,8 @@ h2 {
 
 .inner-list {
     position: relative;
-    margin-left: 2vw;
+    margin-left: 4vw;
     margin-right: 2vw;
-    overflow: hidden;
 }
 
 li {
@@ -164,11 +173,12 @@ ul {
 }
 
 .list-drop-area {
-    opacity: 1;
+    opacity: 0.25;
+    background: orange;
     position: absolute;
+    border-radius: 10vw;
     width: 100%;
     height: 100%;
     top: 0px;
     left: 0px;
-    visibility: hidden;
 }
