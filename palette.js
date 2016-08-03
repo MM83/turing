@@ -7,7 +7,7 @@ $(function(){
     var $panels = $("#action-panel, #routine-panel"), $stepButton = $("#step-button");
     var $panelScroll = $("#panel-scroll"), $routineList = $("#routine-list");
     var $actionItems = $(".action-item"), $dragBar = $("#drag-bar");
-    var $routineDropArea = $("#routine-drop-area");
+    var $routineDropArea = $("#routine-drop-area"), $routineScroll = $("#routine-scroll");
     
     var ANIM_TIME = 300;
     
@@ -38,6 +38,7 @@ $(function(){
         $panelScroll.animate({
             scrollTop : "0px"
         }, ANIM_TIME);
+        $routineScroll.animate({ scrollTop : 0 }, "easeInOutCirc");
     };
     
     function animateInUI(){
@@ -103,13 +104,12 @@ $(function(){
         
         switch(action){
             case "Loop":
-            case "If...":
-                console.log("LOOP CLUB");
+            case "If":
                 $action = $('<li class="routine-condition"/>');
-                var $condTop = $('<div class="routine-item cond-top">').html(action);
-                var $innerList = $('<ul class="inner-list"/>');
                 var $condBottom = $('<div class="routine-item cond-bottom"/>');
+                var $condTop = $('<div class="routine-item cond-top">').html(action);
                 var $dropArea = $('<div class="list-drop-area"></div>');
+                var $innerList = $('<ul class="inner-list"/>');
                 
                 $action.append($condTop);
                 $condTop.append($close);
