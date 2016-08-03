@@ -1,0 +1,57 @@
+body {
+    margin: 0px;
+    overflow: hidden;
+    color: #62af91;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+#main-container {
+}
+
+.panel {
+    position: absolute;
+    background: black;
+    border: 4px solid #62af91;
+    border-radius: 2vw;
+    width: 48vw;
+}
+
+#action-panel {
+    left: 1vw;
+    top: 1vw;
+    bottom: 25vw;
+}
+#routine-panel {
+    right: 1vw;
+    top: 1vw;
+    bottom: 1vw;
+}
+
+.bottom-button {
+    position: absolute;
+    background: black;
+    border: 4px solid #62af91;
+    border-radius: 2vw;
+    width: 49vw;
+    height: 12vw;
+    font-size: 4vw;
+    padding: 3vw;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#exec-button {
+    left: 1vw;
+    bottom: 1vw;
+}
+
+#view-button {
+    left: 1vw;
+    bottom: 13vw;
+}
+
+#step-button {
+/*    right: 1vw;*/
+    right: -50vw;
+    bottom: 1vw;
+}
