@@ -17,7 +17,8 @@ $(function(){
         $actionPanel.css({
             opacity : 1
         }).delay(ANIM_TIME).animate({
-            bottom : "100%",
+            bottom : "125vw",
+            top : "-223vw",
             opacity : 0
         }, ANIM_TIME, "easeInOutQuad");
         $routinePanel.animate({
@@ -39,18 +40,13 @@ $(function(){
             scrollTop : "0px"
         }, ANIM_TIME);
         $routineScroll.animate({ scrollTop : 0 }, "easeInOutCirc");
-        $routineScroll.each(function(){
-            console.log("stepping");
-            var $elem = $(this);
-            $elem.animate({
-                opacity : 0.25
-            });
-        });
+        
     };
     
     function animateInUI(){
         $actionPanel.animate({
             bottom : "25vw",
+            top : "1vw",
             opacity : 1
         }, ANIM_TIME, "easeInOutQuad");
         $routinePanel.delay(ANIM_TIME).animate({
@@ -66,7 +62,7 @@ $(function(){
             borderColor : "#62af91"
         });
         $stepButton.animate({
-            right : "-50vw"
+            right : "-71vw"
         });
         $routineScroll.each(function(){
             console.log("stepping");
@@ -109,6 +105,49 @@ $(function(){
         "Restart" : 7
     };
     
+    var conditions = [
+        "the way is clear",
+        "the way is dangerous",
+        "behind is clear",
+        "behind is dangerous",
+        "the floor ahead is black",
+        "the floor ahead is white",
+        "the floor behind is black",
+        "the floor behind is white",
+    ];
+    
+    function switchCondType(){
+        this.innerHTML = conditions[this.__condTypeIndex = ++this.__condTypeIndex % conditions.length];
+    };
+    
+    function collapse(){
+        var c = this.__collapsed =! this.__collapsed;
+        $(this).css({
+            width : c ? "50%" : "100%"
+        });
+        this.__$innerList.css({
+            display : c ? "none" : "inline"
+        });
+        this.__$dropArea.css({
+            display : c ? "none" : "inline"
+        });
+    };
+    
+    var counterElem, counterValue, initX, div = $("body").width() / 30000;
+    
+    function initCounter(e){
+        counterElem = this;
+        counterValue = this.__value;
+        initX = e.touches[0].pageX;
+    };
+    
+    function updateCounter(e){
+        if(counterElem == this)
+            this.__value += (e.touches[0].pageX - initX) * div;
+        this.innerHTML = Math.round(this.__value);
+        initX = e.touches[0].pageX;
+    };
+    
     function addActionToRoutine(action, elemToAppendTo){
         
         var indent = !elemToAppendTo;
@@ -117,11 +156,16 @@ $(function(){
         var $action, $close = $('<div class="x-box">X</div>');
         
         switch(action){
+                
             case "Loop":
             case "If":
+                
                 $action = $('<li class="routine-condition"/>');
+                
                 var $condBottom = $('<div class="routine-item cond-bottom"/>');
+                
                 var $condTop = $('<div class="routine-item cond-top">').html(action);
+                
                 var $dropArea = $('<div class="list-drop-area"></div>');
                 var $innerList = $('<ul class="inner-list"/>');
                 
@@ -135,12 +179,35 @@ $(function(){
                 $action.append($innerList);
                 $action.append($condBottom);
                 
-                $innerList.sortable();
+                $innerList.sortable({
+                    cancel : ".loop-number, .condition-type"
+                });
                 
                 $action[0].__list = $innerList[0];
                 $dropArea[0].__$list = $innerList;//Hacky but it's JS eh?
                 $innerList[0].__$list = $innerList;
+               
+                $condBottom[0].__$dropArea = $dropArea;
+                $condBottom[0].__$innerList = $innerList;
+                $condBottom.on("touchstart", collapse);
                 
+                var initY, initVal;
+                
+                if(action == "Loop"){
+                    var $counter = $('<div class="loop-number">0</div>');
+                    $counter[0].__value = 0;
+                    $counter.on("touchstart", initCounter);
+                    $counter.on("touchmove", updateCounter);
+                    //TODO - endCounter to null references
+                    $condTop.append($counter);
+                    $condTop.append('<span class="times-label">times</span>');
+                } else {
+                    var $condType = $('<span class="condition-type"/>').html(conditions[0]);
+                    $condTop.append($condType);
+                    $condType[0].__condTypeIndex = 0;
+                    $condType.on("touchstart", switchCondType);
+                    
+                }
                 
                 break;
             default:
@@ -150,17 +217,22 @@ $(function(){
                 break;
         }
         
+        
+        
         if(action == "Restart")
             $action.css({
                 color : "#eb3e3e"
             });
         
         $close.on("touchstart", function(){
-                    $action.remove();
-                });
+            $action.remove();
+        });
         
         $action[0].__action = action;
         elemToAppendTo.append($action);
+        
+        
+        
     };
     
     var draggingAction = false;
@@ -169,9 +241,8 @@ $(function(){
     
     function touchStartAction(e){
         
-        $dragBar.css({
-            visibility : "visible"
-        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
         
         var $elem = $(this);
         
@@ -182,16 +253,23 @@ $(function(){
         
         fadeAllActions(this);
         draggingAction = true;
+        
+        $dragBar.empty();
+        $dragBar.append($elem.clone());
+        
     };
     function touchMoveBody(e){
         lastTouch = e.touches[0];
+        $dragBar.css({
+            left: lastTouch.pageX + "px",
+            top : lastTouch.pageY + "px"
+        });
+        
     };    
     function touchEndBody(e){
         
-        $dragBar.css({
-            visibility : "hidden"
-        });
-       
+        $dragBar.empty();
+        
         if(!lastTouch)
             return;
         if(draggingAction){
@@ -225,35 +303,58 @@ $(function(){
         });
     };
     
+    var tree;
+    var ti = 0;
+    var root;
     
     function buildTree(){
     
-        var tree = [];
         var elem = $routineList[0];
         
         var depth = 0;
+        
         function parse(elem){
             ++depth;
-            //elem is assumed to have a list of child li nodes
+            var list = [];
             $(elem).children("li").each(function(){
-                console.log("li", depth, this.__action);
+                var obj;
                 switch(this.__action){
-                case "Loop":
-                case "If":
-                    parse(this.__list);
+                    case "Loop":
+                        obj = parse(this.__list);
+                        obj.__iter = 10;
+                    case "If":
+                        obj = parse(this.__list);
+                        obj.__type = this.__action;
+                        obj.__depth = depth;
+                        obj.__condition = {
+                            dir : "Forward",
+                            type : "clear",
+                            check : true
+                        };//TODO
                     break;
-                default:
-                    
+                    default:
+                        obj= {
+                            __type : this.__action,
+                            __depth : depth
+                        };
                     break;
-            }
+                }
+                obj.elem = this;
+                list.push(obj);
             });
             --depth;
+            return list;
         };
         
-        parse($routineList[0]);
-        
+        tree = parse($routineList[0]);
     
     };
+    
+    function evalCondition(condition){
+        //TODO
+        return true;
+    };
+    
     
     
     
@@ -262,8 +363,9 @@ $(function(){
     $execButton.on("touchstart", toggleExecute);
     $viewButton.on("touchstart", toggleView);
     
-    //TEMP REMOVE
-    $routineList.sortable();
+    $routineList.sortable({
+        cancel : ".loop-number, .condition-type"
+    });
     
     $("body").on("touchend", touchEndBody);
     $("body").on("touchmove", touchMoveBody);

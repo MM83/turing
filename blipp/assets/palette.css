@@ -7,6 +7,9 @@ body {
 }
 
 #main-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 .panel {
@@ -27,6 +30,24 @@ body {
     top: 1vw;
     bottom: 1vw;
     width: 68vw;
+}
+
+.condition-type {
+    padding-left: 1vw;
+}
+
+.times-label {
+    padding-left: 12vw;
+}
+
+.loop-number {
+    background: #12211b;
+    text-align: center;
+    position: absolute;
+    font-size: 5vw;
+    margin: -4.8vw;
+    margin-left: 7vw;
+    width: 9vw;
 }
 
 .bottom-button {
@@ -54,8 +75,9 @@ body {
 
 #step-button {
 /*    right: 1vw;*/
-    right: -50vw;
+    right: -71vw;
     bottom: 1vw;
+    width: 69vw;
 }
 
 h2 {
@@ -75,7 +97,7 @@ h2 {
 }
 
 .action-item {
-    font-size: 3vw;
+    font-size: 2vw;
     background: #4c4cd0;
     margin: 2vw;
     padding: 2vw;
@@ -84,6 +106,7 @@ h2 {
     box-sizing: border-box;
     text-align: center;
     color: black;
+    
 }
 
 .action-nest {
@@ -100,10 +123,11 @@ h2 {
 
 .routine-item {
     position: relative;
-    font-size: 3vw;
+    font-size: 2.5vw;
     color : #4c4cd0;
-    margin: 2vw;
-    padding: 2vw;
+    margin: 1vw;
+    margin-bottom: 4vw;
+    padding: 1vw;
     border: 4px solid #62af91;
     border-radius: 1vw;
     box-sizing: border-box;
@@ -127,7 +151,7 @@ h2 {
     font-size: 3vw;
     width: 6vw;
     text-align: center;
-    padding: 1vw;
+    padding: 0.25vw;
     box-sizing: border-box;
     color: #eb3e3e;
     font-weight: bold;
@@ -136,6 +160,7 @@ h2 {
 .cond-bottom {
     padding: 1vw;
     border-radius: 2vw;
+    width: 100%;
 }
 
 .inner-list {
@@ -144,8 +169,15 @@ h2 {
     margin-right: 2vw;
 }
 
+.inner-else-list {
+    position: relative;
+    margin-left: 4vw;
+    margin-right: 2vw;
+}
+
 li {
     list-style-type: none;
+    position: relative;
 }
 
 ul {
@@ -162,14 +194,10 @@ ul {
 
 
 #drag-bar {
-    visibility: hidden;
     position: absolute;
-    border-radius: 10vw;
-    background: red;
-    height: 2vw;
-    width: 10vw;
-    top: 10vw;
-    left: 10vw;
+    pointer-events: none;
+    opacity: 0.5;
+    margin: 0vw;
 }
 
 .list-drop-area {
