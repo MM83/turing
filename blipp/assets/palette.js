@@ -1,5 +1,15 @@
 $(function(){
     
+    $.fn.insertAt = function(index, $parent) {
+        return this.each(function() {
+            if (index === 0) {
+                $parent.prepend(this);
+            } else {
+                $parent.children().eq(index - 1).after(this);
+            }
+        });
+    }
+    
     //======================================== GET REFERENCES
     
     var $actionPanel = $("#action-panel"), $routinePanel = $("#routine-panel");
@@ -155,6 +165,17 @@ $(function(){
         
         var $action, $close = $('<div class="x-box">X</div>');
         
+        var lastElementIndex = 0;
+        
+        elemToAppendTo.children().each(function(i){
+            var c = $(this).offset();
+            console.log("check", c.top, lastTouch.pageY);
+            if(c.top < lastTouch.pageY)
+                lastElementIndex = i + 1;
+        });
+        
+        console.log("index", lastElementIndex);
+        
         switch(action){
                 
             case "Loop":
@@ -229,8 +250,11 @@ $(function(){
         });
         
         $action[0].__action = action;
-        elemToAppendTo.append($action);
         
+        
+        //elemToAppendTo.append($action);
+        
+        $action.insertAt(lastElementIndex, elemToAppendTo);
         
         
     };
