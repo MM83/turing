@@ -84,10 +84,11 @@ $(function(){
     };
     
     function toggleExecute(){
-        buildTree();
         if(!running){
             //TODO - Init running
             animateOutUI();
+            buildTree();
+            console.log(tree);
         } else {
             //TODO - Cancel and reset
             animateInUI();
@@ -174,8 +175,6 @@ $(function(){
                 lastElementIndex = i + 1;
         });
         
-        console.log("index", lastElementIndex);
-        
         switch(action){
                 
             case "Loop":
@@ -188,6 +187,7 @@ $(function(){
                 var $condTop = $('<div class="routine-item cond-top">').html(action);
                 
                 var $dropArea = $('<div class="list-drop-area"></div>');
+                
                 var $innerList = $('<ul class="inner-list"/>');
                 
                 $condTop.css({
@@ -201,7 +201,7 @@ $(function(){
                 $action.append($condBottom);
                 
                 $innerList.sortable({
-                    cancel : ".loop-number, .condition-type"
+                    cancel : ".loop-number"
                 });
                 
                 $action[0].__list = $innerList[0];
@@ -262,6 +262,9 @@ $(function(){
     var draggingAction = false;
     var actionToMake;
     var lastTouch;
+    var dragDims = {
+        w : 0, h : 0
+    };
     
     function touchStartAction(e){
         
@@ -280,13 +283,15 @@ $(function(){
         
         $dragBar.empty();
         $dragBar.append($elem.clone());
+        dragDims.w = $dragBar.width() / 2;
+        dragDims.h = $dragBar.height() / 2;
         
     };
     function touchMoveBody(e){
         lastTouch = e.touches[0];
         $dragBar.css({
-            left: lastTouch.pageX + "px",
-            top : lastTouch.pageY + "px"
+            left: (lastTouch.pageX - dragDims.w) + "px",
+            top : (lastTouch.pageY - dragDims.h) + "px"
         });
         
     };    
@@ -333,21 +338,19 @@ $(function(){
     
     function buildTree(){
     
-        var elem = $routineList[0];
-        
         var depth = 0;
         
-        function parse(elem){
+        function parse(elem, parent){
             ++depth;
             var list = [];
             $(elem).children("li").each(function(){
                 var obj;
                 switch(this.__action){
                     case "Loop":
-                        obj = parse(this.__list);
+                        obj = parse(this.__list, obj);
                         obj.__iter = 10;
                     case "If":
-                        obj = parse(this.__list);
+                        obj = parse(this.__list, obj);
                         obj.__type = this.__action;
                         obj.__depth = depth;
                         obj.__condition = {
@@ -363,6 +366,7 @@ $(function(){
                         };
                     break;
                 }
+                obj.__parent = parent;
                 obj.elem = this;
                 list.push(obj);
             });
@@ -370,15 +374,23 @@ $(function(){
             return list;
         };
         
-        tree = parse($routineList[0]);
+        tree = parse($routineList[0], "RAHBET STRINGORR");
+        console.log("TREE", tree);
     
     };
     
-    function evalCondition(condition){
-        //TODO
-        return true;
+    
+    //=====PARSER
+    var indent = 0, step = 0, node = 0;
+    
+    function resetParser(){
+        indent = step = 0;
+        node = tree;
     };
     
+    function getNextAction(){
+        var parent = node.__parent;
+    };
     
     
     
@@ -394,6 +406,7 @@ $(function(){
     $("body").on("touchend", touchEndBody);
     $("body").on("touchmove", touchMoveBody);
     $(".action-item").on("touchstart", touchStartAction);
+    
     
     $(".drop-area").on("mouseleave", function(){
         console.log("shit");
