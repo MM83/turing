@@ -1,3 +1,5 @@
+var buildTree;
+
 (function(){
     
     var _sample = {
@@ -54,11 +56,7 @@
             }
         ]
     };
-    
-    /*
-        The TreeNode has a getNextNode method. If this returns null, move
-        on to the next node.
-    */
+   
     
     function reset(){
         this.conditionMet = false;
@@ -90,7 +88,7 @@
     
     var tree, root, isReadyForExec = false;
     
-    function buildTree(data){
+    function _buildTree(data){
         
         data = JSON.parse(JSON.stringify(data));
         var root = true;
@@ -126,7 +124,6 @@
         //Convenience method for iterating various node types
         ++this.cursor;
         
-        
         var ended = this.cursor >= this.list.length;
         
         switch(this.type){
@@ -153,20 +150,17 @@
     };
     
     function executeNode(){
-//        console.log("exec", this.id, this.type);
+        
         var node, executed;
         
         switch(this.type){
             case "if":
-                if(this.conditionMet || checkCondition(this.name, this.data)){
-                    if(!this.conditionMet)
-                        console.log("condition met");
+                if(this.conditionMet || checkCondition(this.name, this.data))
                     this.conditionMet = true;
-                } else {
+                else 
                     return false;
-                }
             case "list":
-            case "loop": 
+            case "loop":
                 node = this.list[this.cursor];
                 if(!node)
                     throw "Node does not exist!";
@@ -177,26 +171,19 @@
             
                 break;
             case "action":
-                console.log("ACTION", this.name, this.data, this.id);
+                executeAction(this);
                 return false;
         };
         return false;
     };
     
-    /*
-    It is relied upon that every node exists.
-    
-    */
-    
-    buildTree(_sample);
-
-  //  while(tree.executeNode());
+    (buildTree = _buildTree)(_sample);
     
     window.addEventListener("mousedown", function(){
         if(!tree.executeNode())
-            console.log("STREAM ENDED, RESETTING");
-        
+            console.log("STREAM ENDED, RESETTING"); 
     });
+    
     
     
 })();

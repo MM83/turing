@@ -392,8 +392,6 @@ $(function(){
         var parent = node.__parent;
     };
     
-    
-    
     //======================================== BIND TOUCH EVENTS
     
     $execButton.on("touchstart", toggleExecute);
