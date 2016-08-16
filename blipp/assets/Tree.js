@@ -3,38 +3,38 @@ var buildTree;
 (function(){
     
     var _sample = {
-        type : "list",
+        type : "List",
         id : "s0",
         list : [
             {
                 id : "s1",
-                type : "action",
-                name : "move",
-                data : "left"
+                type : "Action",
+                name : "Move",
+                data : "Left"
             },
             {
                 id : "s3",
-                type : "loop",
-                loopCount : 2,
+                type : "Loop",
+                data : 2,
                 list : 
                 [
                     {
                         id : "s4",
-                        type : "action",
-                        name : "move",
-                        data : "down"
+                        type : "Action",
+                        name : "Move",
+                        data : "Down"
                     },
                     {
                         id : "NESTLOOP",
-                        type : "loop",
-                        loopCount : 2,
+                        type : "Loop",
+                        data : 2,
                         list : 
                         [
                             {
                                 id : "nestloopitem",
-                                type : "action",
-                                name : "move",
-                                data : "up"
+                                type : "Action",
+                                name : "Move",
+                                data : "Up"
                             }
                         ]
                     }
@@ -42,14 +42,14 @@ var buildTree;
             },
             {
                 id : "s8",
-                type : "if",
+                type : "If",
                 name : "clear",
                 data : "forward",
                 list : [
                     {
                         id : "sX",
-                        type : "action",
-                        name : "move",
+                        type : "Action",
+                        name : "Move",
                         data : "if body"
                     }
                 ]
@@ -101,9 +101,9 @@ var buildTree;
                 node.root = !(root = false);
             
             switch(node.type){
-                case "list":
-                case "if":    
-                case "loop":
+                case "List":
+                case "If":    
+                case "Loop":
                     for(var i in node.list)
                         parseNode(node.list[i]);
             }
@@ -127,15 +127,15 @@ var buildTree;
         var ended = this.cursor >= this.list.length;
         
         switch(this.type){
-            case "list":
-            case "if":
+            case "List":
+            case "If":
                 if(ended)
                     this.reset();
                 return !ended;//Return true if can execute again
-            case "loop":
+            case "Loop":
                 if(ended){
                     console.log("loop ended");
-                    if(this.loopCursor < this.loopCount - 1){
+                    if(this.loopCursor < this.data - 1){
                         ++this.loopCursor;
                         this.cursor = 0;
                         this.resetChildren();
@@ -154,13 +154,13 @@ var buildTree;
         var node, executed;
         
         switch(this.type){
-            case "if":
+            case "If":
                 if(this.conditionMet || checkCondition(this.name, this.data))
                     this.conditionMet = true;
                 else 
                     return false;
-            case "list":
-            case "loop":
+            case "List":
+            case "Loop":
                 node = this.list[this.cursor];
                 if(!node)
                     throw "Node does not exist!";
@@ -170,20 +170,22 @@ var buildTree;
                 return this.incrementNode();
             
                 break;
-            case "action":
+            case "Action":
                 executeAction(this);
                 return false;
         };
         return false;
     };
     
-    (buildTree = _buildTree)(_sample);
+    buildTree = _buildTree;
     
-    window.addEventListener("mousedown", function(){
-        if(!tree.executeNode())
-            console.log("STREAM ENDED, RESETTING"); 
-    });
-    
+//    (buildTree = _buildTree)(_sample);
+//    
+//    window.addEventListener("mousedown", function(){
+//        if(!tree.executeNode())
+//            console.log("STREAM ENDED, RESETTING"); 
+//    });
+//    
     
     
 })();

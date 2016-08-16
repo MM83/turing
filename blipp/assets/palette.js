@@ -23,6 +23,8 @@ $(function(){
     
     var running = false, viewLevel = false;
     
+    var turingTree;
+    
     function animateOutUI(){
         $actionPanel.css({
             opacity : 1
@@ -87,8 +89,10 @@ $(function(){
         if(!running){
             //TODO - Init running
             animateOutUI();
-            buildTree();
-            console.log(tree);
+            
+            turingTree = buildTree(buildData());
+            console.log(turingTree);
+            
         } else {
             //TODO - Cancel and reset
             animateInUI();
@@ -96,6 +100,14 @@ $(function(){
         running = !running;
         $execButton.html(running ? "ABORT" : "EXECUTE");
     };
+    
+    $stepButton.on("touchstart", function(){
+        if(!running)
+            return;
+        if(!turingTree.executeNode()){
+            toggleExecute();
+        }
+    });
     
     function toggleView(){
         viewLevel = !viewLevel;
@@ -124,7 +136,7 @@ $(function(){
         "the floor ahead is black",
         "the floor ahead is white",
         "the floor behind is black",
-        "the floor behind is white",
+        "the floor behind is white"
     ];
     
     function switchCondType(){
@@ -159,7 +171,7 @@ $(function(){
         initX = e.touches[0].pageX;
     };
     
-    function addActionToRoutine(action, elemToAppendTo){
+    function addActionToRoutine(type, name, data, elemToAppendTo){
         
         var indent = !elemToAppendTo;
         elemToAppendTo = elemToAppendTo || $routineList;
@@ -175,16 +187,16 @@ $(function(){
                 lastElementIndex = i + 1;
         });
         
-        switch(action){
+        switch(type){
                 
             case "Loop":
             case "If":
                 
-                $action = $('<li class="routine-condition"/>');
+                $action = $('<li class="routine-condition"/>').attr("id", newID);
                 
                 var $condBottom = $('<div class="routine-item cond-bottom"/>');
                 
-                var $condTop = $('<div class="routine-item cond-top">').html(action);
+                var $condTop = $('<div class="routine-item cond-top">').html(type + " " + name);
                 
                 var $dropArea = $('<div class="list-drop-area"></div>');
                 
@@ -214,7 +226,7 @@ $(function(){
                 
                 var initY, initVal;
                 
-                if(action == "Loop"){
+                if(type == "Loop"){
                     var $counter = $('<div class="loop-number">0</div>');
                     $counter[0].__value = 0;
                     $counter.on("touchstart", initCounter);
@@ -232,7 +244,7 @@ $(function(){
                 
                 break;
             default:
-                $action = $('<li class="routine-item"></li>').html(action);
+                $action = $('<li class="routine-item"></li>').html(name + " " + data).attr("id", newID);
                 $action.append($close);
                 
                 break;
@@ -240,7 +252,7 @@ $(function(){
         
         
         
-        if(action == "Restart")
+        if(type == "Restart")
             $action.css({
                 color : "#eb3e3e"
             });
@@ -249,7 +261,10 @@ $(function(){
             $action.remove();
         });
         
-        $action[0].__action = action;
+    //    $action[0].__action = action;//TODO - ADD PROPER ATTRIBUTES AND PARSE
+        $action[0].__type = type;
+        $action[0].__data = data;
+        $action[0].__name = name;
         
         
         //elemToAppendTo.append($action);
@@ -259,12 +274,19 @@ $(function(){
         
     };
     
+    var _idN = -1;
+    function newID(){
+        return "elem" + ++_idN;
+    };
+    
     var draggingAction = false;
-    var actionToMake;
+    var actionToMake;//TODO REMOVE AS OBSOLETE
     var lastTouch;
     var dragDims = {
         w : 0, h : 0
     };
+    
+    var _name, _type, _data;
     
     function touchStartAction(e){
         
@@ -274,9 +296,42 @@ $(function(){
         var $elem = $(this);
         
         var offset = $elem.offset();
-        console.log(offset);
         
         actionToMake = $elem.html();
+        
+        var elemHTML = $elem.html();
+        var splitHTML = elemHTML.split(" ");
+        
+        if(splitHTML[0] == "Move"){
+            _type = "Action";
+            _name = "Move";
+            _data = splitHTML[1];
+        };
+        
+        //Defaults, currently not null for HTML
+        _name = _data = "";
+        
+        switch(splitHTML[0]){
+            case "If":
+            case "Loop":
+                _type = splitHTML[0];
+                break;
+            case "Move":
+                _type = "Action";
+                _name = "Move";
+                _data = splitHTML[1];
+                break;
+            case "Turn":
+                _type = "Action";
+                _name = "Turn";
+                _data = splitHTML[1];
+                break;
+            case "Sleep":
+            case "Restart":
+                _type = "Action";
+                _name = splitHTML[0];
+                break;
+        };
         
         fadeAllActions(this);
         draggingAction = true;
@@ -305,10 +360,12 @@ $(function(){
             var dropElement = document.elementFromPoint(lastTouch.pageX, lastTouch.pageY);
             var $drop = $(dropElement);
             if(dropElement.id == "routine-drop-area"){
-                addActionToRoutine(actionToMake);
+            //    addActionToRoutine(actionToMake);
+                addActionToRoutine(_type, _name, _data);
                     //
             } else if($drop.hasClass("list-drop-area") || $drop.hasClass("inner-list")){
-                addActionToRoutine(actionToMake, dropElement.__$list);
+            //    addActionToRoutine(actionToMake, dropElement.__$list);
+                addActionToRoutine(_type, _name, _data, dropElement.__$list);
             }
             
         }
@@ -336,48 +393,43 @@ $(function(){
     var ti = 0;
     var root;
     
-    function buildTree(){
-    
-        var depth = 0;
+    function buildData(){
         
-        function parse(elem, parent){
-            ++depth;
-            var list = [];
-            $(elem).children("li").each(function(){
-                var obj;
-                switch(this.__action){
-                    case "Loop":
-                        obj = parse(this.__list, obj);
-                        obj.__iter = 10;
-                    case "If":
-                        obj = parse(this.__list, obj);
-                        obj.__type = this.__action;
-                        obj.__depth = depth;
-                        obj.__condition = {
-                            dir : "Forward",
-                            type : "clear",
-                            check : true
-                        };//TODO
+        function parseElement(elem, isRoot){
+            
+            var obj = {};
+            
+            if(isRoot){
+                obj.type = "List";
+                elem.__list = elem;
+                obj.name = "ROOT";
+            }
+            else
+                obj.type = elem.__type;
+            
+            obj.name = elem.__name;
+            obj.data = elem.__data;
+            obj.id = elem.id;
+            
+            switch(obj.type){
+                case "Loop":
+                    obj.data = +$(elem).find(".loop-number").first().html();
+                case "If":
+                case "List":
+                    obj.list = [];
+                    $(elem.__list).children("li").each(function(){
+                        obj.list.push(parseElement(this));
+                    });
                     break;
-                    default:
-                        obj= {
-                            __type : this.__action,
-                            __depth : depth
-                        };
-                    break;
-                }
-                obj.__parent = parent;
-                obj.elem = this;
-                list.push(obj);
-            });
-            --depth;
-            return list;
+            };
+            
+            return obj;
         };
         
-        tree = parse($routineList[0], "RAHBET STRINGORR");
-        console.log("TREE", tree);
-    
+        return parseElement($routineList[0], true);
+        
     };
+    
     
     
     //=====PARSER
@@ -388,9 +440,6 @@ $(function(){
         node = tree;
     };
     
-    function getNextAction(){
-        var parent = node.__parent;
-    };
     
     //======================================== BIND TOUCH EVENTS
     

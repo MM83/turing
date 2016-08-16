@@ -1,2 +1,3 @@
 export valid Tree JSON
 export elem id, random elem ids
+jquery data instead of raw __ properties
