@@ -13,7 +13,7 @@
             {
                 id : "s3",
                 type : "loop",
-                loopCount : 5,
+                loopCount : 2,
                 list : 
                 [
                     {
@@ -25,7 +25,7 @@
                     {
                         id : "NESTLOOP",
                         type : "loop",
-                        loopCount : 3,
+                        loopCount : 2,
                         list : 
                         [
                             {
@@ -126,7 +126,6 @@
         //Convenience method for iterating various node types
         ++this.cursor;
         
-        
         var ended = this.cursor >= this.list.length;
         
         switch(this.type){
@@ -138,7 +137,7 @@
             case "loop":
                 if(ended){
                     console.log("loop ended");
-                    if(this.loopCursor < this.loopCount){
+                    if(this.loopCursor < this.loopCount - 1){
                         ++this.loopCursor;
                         this.cursor = 0;
                         this.resetChildren();
