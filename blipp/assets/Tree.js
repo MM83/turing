@@ -15,7 +15,7 @@ var buildTree;
             {
                 id : "s3",
                 type : "loop",
-                loopCount : 5,
+                loopCount : 2,
                 list : 
                 [
                     {
@@ -27,7 +27,7 @@ var buildTree;
                     {
                         id : "NESTLOOP",
                         type : "loop",
-                        loopCount : 3,
+                        loopCount : 2,
                         list : 
                         [
                             {
@@ -135,7 +135,7 @@ var buildTree;
             case "loop":
                 if(ended){
                     console.log("loop ended");
-                    if(this.loopCursor < this.loopCount){
+                    if(this.loopCursor < this.loopCount - 1){
                         ++this.loopCursor;
                         this.cursor = 0;
                         this.resetChildren();
