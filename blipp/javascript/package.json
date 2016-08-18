@@ -7,6 +7,6 @@
         "shortTitle": "Overlay demo"
     },
     "dependencies": {
-        "blippar": "1.1.0"
+        "blippar": "1.1.6"
     }
 }

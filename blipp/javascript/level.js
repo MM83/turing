@@ -4,14 +4,14 @@ exports.level = function Level(scene, blipp){
         playerPos : [0, 0],
         playerFacing : 1,
         cells : [
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [5, 0, 1, 0, 0, 0, 0, 0],
-            [1, 2, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 3, 0, 0, 0],
-            [0, 0, 1, 1, 1, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 1],
-            [0, 0, 0, 0, 0, 5, 0, 1],
-            [0, 0, 0, 0, 0, 1, 4, 4]
+            [1, 1, 1, 1, 1, 0, 2, 1],
+            [0, 1, 2, 2, 1, 0, 2, 1],
+            [0, 3, 0, 1, 1, 0, 3, 1],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [3, 1, 0, 1, 3, 1, 1, 0],
+            [1, 0, 0, 0, 1, 2, 0, 0],
+            [1, 1, 1, 0, 1, 0, 0, 0],
+            [2, 2, 1, 1, 3, 0, 0, 0]
         ]
     };
     
@@ -50,6 +50,31 @@ exports.level = function Level(scene, blipp){
         
     };
     
+    function rotateBot(dir){
+        var ang = player.getRotation()[2];
+        ang -= parseInt(dir * 90);
+        player.animate().duration(300).rotation(0, 0, ang).interpolate("easeInOutBack");
+        playerFacing = (playerFacing + dir) % 4;
+        if(playerFacing < 0)
+            playerFacing += 4;
+    };
+    
+    function moveBot(forward){
+        
+        var x = 0, y = -1;
+        var ang = (playerFacing + (+forward) * 2) * Math.PI / 2;
+        
+        x = Math.round(Math.sin(ang));
+        y = Math.round(Math.cos(ang));
+        
+        playerPos[0] -= x;
+        playerPos[1] += y;
+        
+        var xPos = ((playerPos[0]/ xl) * gridDim - gridDim / 2) * scaleMult;
+        var yPos = -((playerPos[1] / yl) * gridDim - gridDim / 2) * scaleMult;
+        player.animate().duration(300).translation(xPos, yPos, 0).interpolate("easeInOutBack");
+    };
+    
     
     this.checkCell = function(facing){
         
@@ -60,20 +85,17 @@ exports.level = function Level(scene, blipp){
         
         var xl = cells.length;
         
-        
         if(x < 0 || y < 0 || x >= xl || y >= yl)
             return "Out of Bounds";
         
-        var cell = cells[x][y];
-        
-        
-        log("CHECK COORDS", x, y, cell.type);
+        var cell = cells[y][x];
         
         switch(cell.type){
             case Level.CellTypes.Wall:
             case Level.CellTypes.DoorClosed:
                 return "Blocked";
             case Level.CellTypes.Switch:
+                return "Switch";
             case Level.CellTypes.Path:
             case Level.CellTypes.DoorOpen:
                 return "Clear";
@@ -86,33 +108,28 @@ exports.level = function Level(scene, blipp){
   
     
     scene.sendAction = function(type, name, data){
+        log("send team", type, name, data);
         switch(name){
             case "Move":
-                if(name == "Forward"){
-                    
-                } else {
-                    
-                }
+                moveBot(data == "Forward");
+                cycleBoard();
                 break;
             case "Turn":
-                if(name == "Right"){
-                    playerFacing = ++playerFacing % 4;
-                } else {
-                    if(--playerFacing < 0)
-                        playerFacing += 4;
-                }
+                rotateBot(data == "Right" ? 1 : -1);
+                cycleBoard();
                 break;
-            case "Press":
+            case "Sleep":
+                cycleBoard();
                 break;
         };
-        
-//        setTimeout(500, function(){
-//            blipp.callJavascript("blippCallback(20);");
-//        });
+        setTimeout(function(){
+            console.log("send club");
+            blipp.callHTMLJavascript("blippCallback(20);");
+        }, 500);
     };
     
     
-    var player, cells, playerPos, playerFacing, levelData, basePlane, xl, yl;
+    var player, cells, playerPos, playerFacing, levelData, basePlane, xl, yl, xd, yd;
     
     var gridDim = 100, scaleMult = 4;
     
@@ -168,6 +185,7 @@ exports.level = function Level(scene, blipp){
         var zScale = 0.1;
         var cellColour = "#000000";
         var node = this.scene.addMesh("Cube.md2");
+        node.setTexture("tiles.png").setTextureScale(0.5, 0.5);
         
         var cell = {
             node : node,
@@ -178,30 +196,32 @@ exports.level = function Level(scene, blipp){
         switch(type){
             case Level.CellTypes.Wall:
                 zScale = 0.25;
+                node.setTextureOffset(0.5, 0.5);
                 break;
             case Level.CellTypes.Path:
-                cellColour = "#eeeeee";
     //            node.setHidden(true);
+                node.setColor(0.7, 0.7, 0.7, 1);
                 break;
             case Level.CellTypes.Lava:
-                cellColour = "#fcaa53";
+                node.setTextureOffset(0.5, 0);
                 break;
             case Level.CellTypes.Switch:
-                cellColour = "#2266fa";
+                node.setTextureOffset(0.5, 0.5);
+                node.setColor(1.2, 1.2, 0.3, 1);
                 zScale = 0.18;
                 break;
             case Level.CellTypes.DoorOpen:
-                cellColour = "#1d3b7b";
+                node.setTextureOffset(0, 0.5);
                 zScale = 0.25;
                 zPos = 30;
                 break;
             case Level.CellTypes.DoorClosed:
-                cellColour = "#1d3b7b";
+                node.setTextureOffset(0, 0.5);
                 zScale = 0.25;
                 break;
         };
         
-        node.setScale(0.25, 0.25, zScale).setColor(cellColour).setTranslation(xPos, yPos, zPos);
+        node.setScale(0.25, 0.25, zScale).setTranslation(xPos, yPos, zPos);
         
         return cell;
     };

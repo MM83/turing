@@ -2,9 +2,9 @@ var blippCallback;
 
 $(function(){
     
-    
-    blippCallback = function(data){
-        $('body').html("SHITTO " + data);
+    window.blippCallback = 
+    this.blippCallback   = 
+    blippCallback        = function(data){
     };
     
     

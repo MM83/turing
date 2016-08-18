@@ -13,5 +13,4 @@ function rnd(){
 scene.onShow = function(){
     blipp.overlayHTML('', true, true, 'palette.html?rnd=' + rnd());
     level.init();
-  //  level.execAction("Move", "Left");
 };
