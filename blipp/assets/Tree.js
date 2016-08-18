@@ -83,7 +83,7 @@ var buildTree;
     };
     
     function executeAction(data){
-        console.log("EXECUTING", data.name, data.data);
+        B.runCallApp("sendAction", [data.type, data.name, data.data]);
     };
     
     var tree, root, isReadyForExec = false;
@@ -134,7 +134,6 @@ var buildTree;
                 return !ended;//Return true if can execute again
             case "Loop":
                 if(ended){
-                    console.log("loop ended");
                     if(this.loopCursor < this.data - 1){
                         ++this.loopCursor;
                         this.cursor = 0;
@@ -173,19 +172,19 @@ var buildTree;
             case "Action":
                 executeAction(this);
                 return false;
+            case "Flow":
+                switch(this.name){
+                    case "Restart":
+                        executeAction(this);
+                        tree.reset();
+                        break;
+                };
+                return true;
         };
         return false;
     };
     
     buildTree = _buildTree;
-    
-//    (buildTree = _buildTree)(_sample);
-//    
-//    window.addEventListener("mousedown", function(){
-//        if(!tree.executeNode())
-//            console.log("STREAM ENDED, RESETTING"); 
-//    });
-//    
-    
+
     
 })();

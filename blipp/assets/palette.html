@@ -1,16 +1,18 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <script src="utils.js"></script>
         <script src="jQuery.js"></script>
         <script src="jQueryUI.js"></script>
         <script src="jQueryTouch.js"></script>
-        <script src="Tree.js"></script>
-        <script src="palette.js"></script>
+        <script src="Tree.js?rnd=342"></script>
+        <script src="palette.js?rnd=34444"></script>
         <link rel="stylesheet" type="text/css" href="palette.css"/>
     </head>
     
     <body>
         <div id="main-container">
+            <div id="exit-button" class="bottom-button">EDIT LEVEL</div>
             <div id="action-panel" class="panel">
                 <h2>ACTIONS</h2>
                 <div class="panel-scroll">
@@ -18,9 +20,11 @@
                     <div class="action-item">Move Backward</div>
                     <div class="action-item">Turn Right</div>
                     <div class="action-item">Turn Left</div>
+                    <div class="action-item">Press</div>
                     <div class="action-item">Sleep</div>
                     <div class="action-item action-nest">Loop</div>
                     <div class="action-item action-nest">If</div>
+                    <div class="action-item action-nest">While</div>
                     <div class="action-item action-nest action-return">Restart</div>
                 </div>
             </div>
@@ -36,7 +40,7 @@
             </div>
             <div id="view-button" class="bottom-button">VIEW LEVEL</div>
             <div id="exec-button" class="bottom-button">EXECUTE</div>
-            <div id="step-button" class="bottom-button">NEXT STEP</div>
+            <div id="step-button" class="bottom-button">NEXT</div>
             <div id="drag-bar"></div>
         </div>
     </body>

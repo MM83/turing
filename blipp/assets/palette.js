@@ -1,4 +1,12 @@
+var blippCallback;
+
 $(function(){
+    
+    
+    blippCallback = function(data){
+        $('body').html("SHITTO " + data);
+    };
+    
     
     $.fn.insertAt = function(index, $parent) {
         return this.each(function() {
@@ -13,7 +21,7 @@ $(function(){
     //======================================== GET REFERENCES
     
     var $actionPanel = $("#action-panel"), $routinePanel = $("#routine-panel");
-    var $execButton = $('#exec-button'), $viewButton = $("#view-button");
+    var $execButton = $('#exec-button'), $viewButton = $("#view-button"), $exitButton = $("#exit-button");
     var $panels = $("#action-panel, #routine-panel"), $stepButton = $("#step-button");
     var $panelScroll = $("#panel-scroll"), $routineList = $("#routine-list");
     var $actionItems = $(".action-item"), $dragBar = $("#drag-bar");
@@ -41,6 +49,11 @@ $(function(){
             left : "-50vw",
             opacity: 0
         }, ANIM_TIME);
+        $exitButton.animate({
+            left : "-50vw",
+            opacity: 0
+        }, ANIM_TIME);
+        
         $execButton.animate({
             color : "red",
             borderColor : "red"
@@ -58,7 +71,7 @@ $(function(){
     function animateInUI(){
         $actionPanel.animate({
             bottom : "25vw",
-            top : "1vw",
+            top : "13vw",
             opacity : 1
         }, ANIM_TIME, "easeInOutQuad");
         $routinePanel.delay(ANIM_TIME).animate({
@@ -69,6 +82,11 @@ $(function(){
             left : "1vw",
             opacity : 1
         }, ANIM_TIME);
+        $exitButton.delay(ANIM_TIME).animate({
+            left : "1vw",
+            opacity : 1
+        }, ANIM_TIME);
+        
         $execButton.animate({
             color : "#62af91",
             borderColor : "#62af91"
@@ -77,7 +95,6 @@ $(function(){
             right : "-71vw"
         });
         $routineScroll.each(function(){
-            console.log("stepping");
             var $elem = $(this);
             $elem.animate({
                 opacity : 1
@@ -89,9 +106,7 @@ $(function(){
         if(!running){
             //TODO - Init running
             animateOutUI();
-            
             turingTree = buildTree(buildData());
-            console.log(turingTree);
             
         } else {
             //TODO - Cancel and reset
@@ -108,6 +123,7 @@ $(function(){
             toggleExecute();
         }
     });
+    
     
     function toggleView(){
         viewLevel = !viewLevel;
@@ -129,14 +145,12 @@ $(function(){
     };
     
     var conditions = [
-        "the way is clear",
-        "the way is dangerous",
-        "behind is clear",
-        "behind is dangerous",
-        "the floor ahead is black",
-        "the floor ahead is white",
-        "the floor behind is black",
-        "the floor behind is white"
+        "<br/>the way is clear",
+        "<br/>the way is blocked",
+        "<br/>the way is dangerous",
+        "<br/>behind is clear",
+        "<br/>behind is blocked",
+        "<br/>the way is dangerous"
     ];
     
     function switchCondType(){
@@ -182,7 +196,6 @@ $(function(){
         
         elemToAppendTo.children().each(function(i){
             var c = $(this).offset();
-            console.log("check", c.top, lastTouch.pageY);
             if(c.top < lastTouch.pageY)
                 lastElementIndex = i + 1;
         });
@@ -192,7 +205,7 @@ $(function(){
             case "Loop":
             case "If":
                 
-                $action = $('<li class="routine-condition"/>').attr("id", newID);
+                $action = $('<li class="routine-condition"/>').attr("id", newID());
                 
                 var $condBottom = $('<div class="routine-item cond-bottom"/>');
                 
@@ -244,18 +257,22 @@ $(function(){
                 
                 break;
             default:
-                $action = $('<li class="routine-item"></li>').html(name + " " + data).attr("id", newID);
+                $action = $('<li class="routine-item"></li>').html(name + " " + data).attr("id", newID());
                 $action.append($close);
                 
                 break;
         }
         
-        
-        
-        if(type == "Restart")
-            $action.css({
-                color : "#eb3e3e"
-            });
+       
+        switch(name){
+            case "Restart":
+            case "Break":
+            case "Next":
+                $action.css({
+                    color : "#eb3e3e"
+                });
+                break;
+        }
         
         $close.on("touchstart", function(){
             $action.remove();
@@ -321,15 +338,19 @@ $(function(){
                 _name = "Move";
                 _data = splitHTML[1];
                 break;
+            case "Press":
+            case "Sleep":
             case "Turn":
                 _type = "Action";
-                _name = "Turn";
-                _data = splitHTML[1];
-                break;
-            case "Sleep":
-            case "Restart":
-                _type = "Action";
                 _name = splitHTML[0];
+                _data = splitHTML[1] || "";
+                break;
+            case "Restart":
+            case "Next":
+            case "Break":
+                _type = "Flow";
+                _name = splitHTML[0];
+                _data = "";
                 break;
         };
         
@@ -435,11 +456,11 @@ $(function(){
     //=====PARSER
     var indent = 0, step = 0, node = 0;
     
-    function resetParser(){
-        indent = step = 0;
-        node = tree;
-    };
-    
+//    function resetParser(){
+//        indent = step = 0;
+//        node = tree;
+//    };
+//    
     
     //======================================== BIND TOUCH EVENTS
     
@@ -454,9 +475,5 @@ $(function(){
     $("body").on("touchmove", touchMoveBody);
     $(".action-item").on("touchstart", touchStartAction);
     
-    
-    $(".drop-area").on("mouseleave", function(){
-        console.log("shit");
-    });
-    
+   
 });

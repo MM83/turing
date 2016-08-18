@@ -1,3 +1,25 @@
-export valid Tree JSON
-export elem id, random elem ids
+export valid Tree JSON DONE
+export elem id, random elem ids DONE
+
 jquery data instead of raw __ properties
+
+exit button DONE
+catch error when no program built, prevent execute
+
+Level editor, brushes etc
+Doors and switches (on door, must select switch or cancel, switches must be put down first)
+Restart statement DON
+
+
+Prevent execute in view code mode
+
+Tiles for each type (inc door) DONE
+Bot placement DONE
+
+Bot move
+Bot turn
+
+
+
+Step (sleep etc)
+
