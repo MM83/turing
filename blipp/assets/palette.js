@@ -76,7 +76,7 @@ $(function(){
         }, ANIM_TIME, "easeInOutQuad");
         $routinePanel.delay(ANIM_TIME).animate({
             bottom : "1vw",
-            top : "1vw"
+            top : "50vh"
         }, ANIM_TIME);
         $viewButton.animate({
             left : "1vw",
